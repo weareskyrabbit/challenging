@@ -36,6 +36,10 @@ private:
     unsigned int operand1();
     unsigned int operand2();
     unsigned int operand3();
+    unsigned int type(int instruction);
+    unsigned int operand1(int instruction);
+    unsigned int operand2(int instruction);
+    unsigned int operand3(int instruction);
 };
 
 

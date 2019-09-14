@@ -14,6 +14,9 @@ void VirtualMachine::analyze() {
     // cout << "registers size : " << (unsigned int) registers_size << endl;
     registers = new Object_*[registers_size];
 
+    int references_size = read_int();
+    // cout << "references size : " << (unsigned int) functions_size << endl;
+
     int functions_size = read_int();
     // cout << "functions size : " << (unsigned int) functions_size << endl;
 
@@ -71,51 +74,127 @@ void VirtualMachine::analyze() {
 
 #endif
 void VirtualMachine::execute() {
-    /* TODO impl
     int* pc = instructions;
     int i;
 #ifdef DIRECT_THREADED
     static void* table[] = {
-
+        &&L_STOP,
+        &&L_CALL,
+        &&L_RETURN,
+        &&L_BR,
+        &&L_BR_N,
+        &&L_NOP,
+        &&L_NOP,
+        &&L_NOP,
+        &&L_NOP,
+        &&L_NOP,
+        &&L_NOP,
+        &&L_NOP,
+        &&L_NOP,
+        &&L_NOP,
+        &&L_NOP,
+        &&L_NOP,
+        &&L_COPY,
+        &&L_NOP,
+        &&L_NOP,
+        &&L_NOP,
+        &&L_NOP,
+        &&L_NOP,
+        &&L_NOP,
+        &&L_NOP,
+        &&L_NOP,
+        &&L_NOP,
+        &&L_NOP,
+        &&L_NOP,
+        &&L_NOP,
+        &&L_NOP,
+        &&L_NOP,
+        &&L_NOP,
+        &&L_ADD0,
+        &&L_ADD1,
+        &&L_ADD2,
+        &&L_SUB0,
+        &&L_SUB1,
+        &&L_SUB2,
+        &&L_MUL0,
+        &&L_MUL1,
+        &&L_MUL2,
+        &&L_DIV0,
+        &&L_DIV1,
+        &&L_DIV2,
+        &&L_NOP,
+        &&L_NOP,
+        &&L_NOP,
+        &&L_NOP,
+        &&L_PRINT0,
+        &&L_PRINT1
     };
 #endif
-    INIT_DISPATCH
-        CASE() {
+    INIT_DISPATCH {
+        CASE(NOP) {
+        } NEXT;
+        CASE(STOP) {
+            return;
+        } NEXT;
+        CASE(CALL) {
+            // TODO
+        } NEXT;
+        CASE(RETURN) {
+            // TODO
+        } NEXT;
+        CASE(BR) {
 
         } NEXT;
-        CASE() {
+        CASE(BR_N) {
 
         } NEXT;
-    END_DISPATCH
-    */
-    while (true) {
-        switch (type()) {
-            case 0x00: // stop
-                return;
-            case 0x10: // copy
-                registers[operand1()] = constant_pool[operand2()];
-                break;
-            case 0x20: // add
-                registers[operand1()] = (Object_*) ((int) registers[operand2()] + (int) registers[operand3()]);
-                break;
-            case 0x21: // sub
-                registers[operand1()] = (Object_*) ((int) registers[operand2()] - (int) registers[operand3()]);
-                break;
-            case 0x22: // mul
-                registers[operand1()] = (Object_*) ((int) registers[operand2()] * (int) registers[operand3()]);
-                break;
-            case 0x23: // div
-                registers[operand1()] = (Object_*) ((int) registers[operand2()] / (int) registers[operand3()]);
-                break;
-            case 0x30: // print_string
-                cout << ((string*) constant_pool[operand1()])->c_str() << endl;
-                break;
-            case 0x31: // print
-                cout << (int) registers[operand1()] << endl;
-                break;
-        }
-        counter++;
+        CASE(COPY) {
+            registers[operand1(i)] = constant_pool[operand2(i)];
+        } NEXT;
+        CASE(ADD0) {
+            registers[operand1(i)] = (Object_*) ((int) registers[operand2(i)] + (int) registers[operand3(i)]);
+        } NEXT;
+        CASE(ADD1) {
+            registers[operand1(i)] = (Object_*) ((int) registers[operand2(i)] + (int) constant_pool[operand3(i)]);
+        } NEXT;
+        CASE(ADD2) {
+            registers[operand1(i)] = (Object_*) ((int) constant_pool[operand2(i)] + (int) constant_pool[operand3(i)]);
+        } NEXT;
+        CASE(SUB0) {
+            registers[operand1(i)] = (Object_*) ((int) registers[operand2(i)] - (int) registers[operand3(i)]);
+        } NEXT;
+        CASE(SUB1) {
+            registers[operand1(i)] = (Object_*) ((int) registers[operand2(i)] - (int) constant_pool[operand3(i)]);
+        } NEXT;
+        CASE(SUB2) {
+            registers[operand1(i)] = (Object_*) ((int) constant_pool[operand2(i)] - (int) constant_pool[operand3(i)]);
+        } NEXT;
+        CASE(MUL0) {
+            registers[operand1(i)] = (Object_*) ((int) registers[operand2(i)] * (int) registers[operand3(i)]);
+        } NEXT;
+        CASE(MUL1) {
+            registers[operand1(i)] = (Object_*) ((int) registers[operand2(i)] * (int) constant_pool[operand3(i)]);
+        } NEXT;
+        CASE(MUL2) {
+            registers[operand1(i)] = (Object_*) ((int) constant_pool[operand2(i)] * (int) constant_pool[operand3(i)]);
+        } NEXT;
+        CASE(DIV0) {
+            registers[operand1(i)] = (Object_*) ((int) registers[operand2(i)] / (int) registers[operand3(i)]);
+        } NEXT;
+        CASE(DIV1) {
+            registers[operand1(i)] = (Object_*) ((int) registers[operand2(i)] / (int) constant_pool[operand3(i)]);
+        } NEXT;
+        CASE(DIV2) {
+            registers[operand1(i)] = (Object_*) ((int) constant_pool[operand2(i)] / (int) constant_pool[operand3(i)]);
+        } NEXT;
+        CASE(PRINT0) {
+            cout << ((string*) constant_pool[operand1(i)])->c_str() << endl;
+        } NEXT;
+        CASE(PRINT1) {
+            cout << (int) registers[operand1(i)] << endl;
+        } NEXT;
     }
+    END_DISPATCH;
 }
 vector<uint8_t> VirtualMachine::read(const int length) {
     vector<uint8_t> bytes;
@@ -145,4 +224,16 @@ unsigned int VirtualMachine::operand2() {
 }
 unsigned int VirtualMachine::operand3() {
     return instructions[counter] & 0xff;
+}
+unsigned int VirtualMachine::type(int instruction) {
+    return instruction >> 24 & 0xff;
+}
+unsigned int VirtualMachine::operand1(int instruction) {
+    return instruction >> 16 & 0xff;
+}
+unsigned int VirtualMachine::operand2(int instruction) {
+    return instruction >> 8 & 0xff;
+}
+unsigned int VirtualMachine::operand3(int instruction) {
+    return instruction & 0xff;
 }
