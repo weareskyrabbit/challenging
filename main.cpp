@@ -10,7 +10,7 @@ int main() {
     vector<uint8_t> input;
     // write
     ofstream fout;
-    fout.open(R"(C:\Users\mirro\Desktop\myprojects\incremental\test2.wc)", ios::out | ios::binary | ios::trunc);
+    fout.open(R"(test2.wc)", ios::out | ios::binary | ios::trunc);
     if (!fout) {
         cout << "error : file 'test2.wc' didn't open" << endl;
         return 1;
@@ -41,7 +41,7 @@ int main() {
 
     fout.close();
 
-    fout.open(R"(C:\Users\mirro\Desktop\myprojects\incremental\hello.wc)", ios::out | ios::binary | ios::trunc);
+    fout.open(R"(hello.wc)", ios::out | ios::binary | ios::trunc);
     if (!fout) {
         cout << "error : file 'hello.wc' didn't open" << endl;
         return 1;
