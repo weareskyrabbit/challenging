@@ -17,9 +17,11 @@ int main() {
     }
     unsigned int test2[] = {
             0xdeadbeef, // magic
+            0,          // entry point
             4,          // registers size
             0,          // references size
             1,          // functions size
+            0,          // extent
 
             // main
             5,          // instructions size
@@ -56,16 +58,18 @@ int main() {
     }
     unsigned int test3[] = {
             0xdeadbeef, // magic
+            0,          // entry point
             1,          // registers size
             0,          // references size
             2,          // functions size
+            0,          // extent
+            2,          // extent
 
             // main
-            2,          // instructions size
+            4,          // instructions size
             0x01000000, // call   c0
             0x00000000, // stop
             // hello
-            2,          // instructions size
             0x30010000, // print_string c1
             0x02000000, // return
 
@@ -93,6 +97,7 @@ int main() {
     }
     unsigned int test4[] = {
             0xdeadbeef, // magic
+            0,          // entry point
             1,          // registers size
             0,          // references size
             1,          // functions size
@@ -131,9 +136,11 @@ int main() {
     }
     unsigned int hello[] = {
             0xdeadbeef, // magic
+            0,          // entry point
             1,          // registers size
             0,          // references size
             1,          // functions size
+            0,          // extent
 
             // main
             2,          // instructions size
@@ -171,10 +178,10 @@ int main() {
     VirtualMachine* vm = new VirtualMachine(input);
 
     // analyze
-    vm->analyze();
+    int entry_point = vm->analyze();
 
     // execute
-    vm->execute();
+    vm->execute(entry_point);
 
     input.clear();
 
@@ -193,9 +200,9 @@ int main() {
     vm = new VirtualMachine(input);
 
     // analyze
-    vm->analyze();
+    entry_point = vm->analyze();
 
     // execute
-    vm->execute();
+    vm->execute(entry_point);
     return 0;
 }

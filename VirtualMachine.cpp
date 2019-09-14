@@ -4,11 +4,14 @@
 
 #include "VirtualMachine.h"
 
-void VirtualMachine::analyze() {
+int VirtualMachine::analyze() {
     int magic = read_int();
     if (magic != 0xdeadbeef) {
         cout << "error : magic is invalid" << endl;
     }
+
+    int entry_point = read_int();
+    // cout << "entry point : " << (unsigned int) entry_point << endl;
 
     int registers_size = read_int();
     // cout << "registers size : " << (unsigned int) registers_size << endl;
@@ -19,6 +22,10 @@ void VirtualMachine::analyze() {
 
     int functions_size = read_int();
     // cout << "functions size : " << (unsigned int) functions_size << endl;
+    functions = new int[functions_size];
+    for (int i = 0; i < functions_size; i++) {
+        functions[i] = read_int();
+    }
 
     int instructions_size = read_int();
     // cout << "instructions size : " << (unsigned int) instructions_size << endl;
@@ -50,6 +57,7 @@ void VirtualMachine::analyze() {
                 break;
         }
     }
+    return entry_point;
 }
 // direct threading
 #if defined __GNUC__ || defined __clnag__ || defined __INTEL_COMPILER
@@ -73,8 +81,8 @@ void VirtualMachine::analyze() {
 #define END_DISPATCH }}
 
 #endif
-void VirtualMachine::execute() {
-    int* pc = instructions;
+void VirtualMachine::execute(int entry_point) {
+    int* pc = instructions + functions[entry_point];
     int i;
 #ifdef DIRECT_THREADED
     static void* table[] = {

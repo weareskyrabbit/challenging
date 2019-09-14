@@ -21,14 +21,15 @@ private:
     Object_** constant_pool;
     int counter; // program counter
     Object_** registers;
+    int* functions;
 public:
     VirtualMachine(const vector<uint8_t> input) {
         this->input = input;
         this->position = 0;
         this->counter = 0;
     }
-    void analyze();
-    void execute();
+    int analyze();
+    void execute(int entry_point);
 private:
     vector<uint8_t> read(int length);
     unsigned int read_int();
