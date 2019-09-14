@@ -30,20 +30,71 @@ void VirtualMachine::analyze() {
     for (int i = 0; i < constant_pool_size; i++) {
         constant_pool[i] = (Object_*) new string(20, ' ');
     }
-    read_int();
-    constant_pool[0] = (Object_ *) read_int();
-    read_int();
-    constant_pool[1] = (Object_ *) read_int();
-    read_int();
-    constant_pool[2] = (Object_ *) read_int();
+    for (int i = 0; i < constant_pool_size; i++) {
+        int tag = read_int();
+        switch (tag) {
+            case 0x0: // int
+                constant_pool[i] = (Object_ *) read_int();
+                break;
+            case 0x1: // string
+                int size = read_int();
+                vector<uint8_t> bytes = read(size);
+                string* s = new string(20, ' ');
+                for (int j = 0; j < size; j++) {
+                    (*(s))[j] = (char) bytes[j];
+                }
+                constant_pool[i] = (Object_ *) s;
+                break;
+        }
+    }
 }
+// direct threading
+#if defined __GNUC__ || defined __clnag__ || defined __INTEL_COMPILER
+#define DIRECT_THREADED
+#endif
+
+#ifdef DIRECT_THREADED
+
+#define INIT_DISPATCH JUMP;
+#define CASE(op) L_ ## op:
+#define NEXT i=*++pc; goto *table[type(i)]
+#define JUMP i=*pc; goto *table[type(i)]
+#define END_DISPATCH
+
+#else
+
+#define INIT_DISPATCH while(true) { i = *pc; switch (type(i)) {
+#define CASE(op) case op:
+#define NEXT pc++; break;
+#define JUMP break
+#define END_DISPATCH }}
+
+#endif
 void VirtualMachine::execute() {
+    /* TODO impl
+    int* pc = instructions;
+    int i;
+#ifdef DIRECT_THREADED
+    static void* table[] = {
+
+    };
+#endif
+    INIT_DISPATCH
+        CASE() {
+
+        } NEXT;
+        CASE() {
+
+        } NEXT;
+    END_DISPATCH
+    */
     while (true) {
         switch (type()) {
             case 0x00: // stop
                 return;
             case 0x10: // copy
                 registers[operand1()] = constant_pool[operand2()];
+                break;
             case 0x20: // add
                 registers[operand1()] = (Object_*) ((int) registers[operand2()] + (int) registers[operand3()]);
                 break;
@@ -57,7 +108,7 @@ void VirtualMachine::execute() {
                 registers[operand1()] = (Object_*) ((int) registers[operand2()] / (int) registers[operand3()]);
                 break;
             case 0x30: // print_string
-                cout << (string*) constant_pool[operand1()] << endl;
+                cout << ((string*) constant_pool[operand1()])->c_str() << endl;
                 break;
             case 0x31: // print
                 cout << (int) registers[operand1()] << endl;
@@ -77,6 +128,7 @@ vector<uint8_t> VirtualMachine::read(const int length) {
 }
 unsigned int VirtualMachine::read_int() {
     vector<uint8_t> bytes = read(4);
+    // little endian
     return bytes[0] |
            bytes[1] << 8 |
            bytes[2] << 16 |
