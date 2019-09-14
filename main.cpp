@@ -69,7 +69,7 @@ int main() {
 
     // read
     ifstream fin;
-    fin.open(R"(C:\Users\mirro\Desktop\myprojects\incremental\test2.wc)", ios::in | ios::binary);
+    fin.open(R"(test2.wc)", ios::in | ios::binary);
     if (!fin) {
         cout << "error : file 'test2.wc' didn't open" << endl;
         return 1;
@@ -91,7 +91,7 @@ int main() {
     input.clear();
 
     // read
-    fin.open(R"(C:\Users\mirro\Desktop\myprojects\incremental\hello.wc)", ios::in | ios::binary);
+    fin.open(R"(hello.wc)", ios::in | ios::binary);
     if (!fin) {
         cout << "error : file 'hello.wc' didn't open" << endl;
         return 1;
