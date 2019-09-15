@@ -35,7 +35,7 @@ public:
         this->counter = 0;
     }
     uint32_t load(string file_name);
-    void execute(int entry_point);
+    void execute(uint32_t entry_point);
 private:
     uint8_t* read(int32_t length);
     uint32_t* read_int();

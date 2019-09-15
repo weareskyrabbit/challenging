@@ -5,27 +5,29 @@
 #include <fstream>
 #include "VirtualMachine.h"
 
-<<<<<<< HEAD
 using namespace std;
+
+// #define ON_DEBUG
 
 #ifdef ON_DEBUG
 
-#define DEBUG_OUT(message) cout << "DEBUG out: " << message << endl;
+#define DEBUG_OUT(message, target) cout << "debug | " << message << target << endl
 
 #else
 
-#define DEBUG_OUT(message)
+#define DEBUG_OUT(message, target)
 
 #endif
 
 uint32_t VirtualMachine::load(string file_name) {
     input.clear();
+    position = 0;
     file_name += ".wc";
     ifstream fin;
     fin.open(file_name.c_str(), ios::in | ios::binary);
     if (!fin) {
-        cout << "error : file `"<< file_name.c_str() <<"` didn't open" << endl;
-        return 1;
+        cout << "error | file `"<< file_name.c_str() <<"` didn't open" << endl;
+        exit(1);
     }
     while (!fin.eof()) {
         uint8_t byte = 0;
@@ -35,44 +37,49 @@ uint32_t VirtualMachine::load(string file_name) {
     fin.close();
 
     uint32_t magic = *read_int();
+    DEBUG_OUT("magic : ", magic);
     if (magic != 0xdeadbeef) {
-        cout << "error : magic is invalid" << endl;
+        cout << "error | magic is invalid" << endl;
     }
 
     uint32_t entry_point = *read_int();
-    // cout << "entry point : " << (unsigned int) entry_point << endl;
+    DEBUG_OUT("entry point : ", entry_point);
 
     uint32_t registers_size = *read_int();
-    // cout << "registers size : " << (unsigned int) registers_size << endl;
+    DEBUG_OUT("registers size : ", registers_size);
     registers = new Object_*[registers_size];
 
     uint32_t references_size = *read_int();
-    // cout << "references size : " << (unsigned int) functions_size << endl;
+    DEBUG_OUT("references size : ", references_size);
 
     uint32_t functions_size = *read_int();
-    // cout << "functions size : " << (unsigned int) functions_size << endl;
+    DEBUG_OUT("functions size : ", functions_size);
     functions = new uint32_t[functions_size];
-    functions = (uint32_t*)read(functions_size * sizeof(uint32_t));
+    functions = (uint32_t*) read(sizeof(uint32_t) * functions_size);
 
     int32_t instructions_size = *read_int();
-    // cout << "instructions size : " << (unsigned int) instructions_size << endl;
+    DEBUG_OUT("instructions size : ", instructions_size);
     instructions = new instruction[instructions_size];
-    instructions = (instruction*)read(sizeof(instruction) * instructions_size);
+    instructions = (instruction*) read(sizeof(instruction) * instructions_size);
 
     uint32_t constant_pool_size = *read_int();
-    // cout << "constant pool size : " << (unsigned int) constant_pool_size << endl;
+    DEBUG_OUT("constant pool size : ", constant_pool_size);
     constant_pool = new Object_*[constant_pool_size];
 
     for (uint32_t i = 0; i < constant_pool_size; i++) {
         uint32_t tag = *read_int();
+        uint32_t size;
         switch (tag) {
             case 0x0: // int
-                constant_pool[i] = (Object_ *) read_int();
+                constant_pool[i] = (Object_ *) *read_int();
                 break;
             case 0x1: // string
-                uint32_t size = *read_int();
+                size = *read_int();
                 constant_pool[i] = (Object_ *) read(size);
                 break;
+            default:
+                cout << "error | illegal constant type `" << tag << "`" << endl;
+                exit(1);
         }
     }
     return entry_point;
@@ -99,7 +106,7 @@ uint32_t VirtualMachine::load(string file_name) {
 #define END_DISPATCH }}
 
 #endif
-void VirtualMachine::execute(int32_t entry_point) {
+void VirtualMachine::execute(uint32_t entry_point) {
     instruction* pc = instructions + functions[entry_point];
     instruction i;
 #ifdef DIRECT_THREADED
@@ -158,68 +165,69 @@ void VirtualMachine::execute(int32_t entry_point) {
 #endif
     INIT_DISPATCH {
         CASE(NOP) {
+            DEBUG_OUT("nop called with instruction : ", (uint32_t) pc->type);
         } NEXT;
         CASE(STOP) {
-            return;
-        } NEXT;
+            DEBUG_OUT("stop called with instruction : ", (uint32_t) pc->type);
+        } return;
         CASE(CALL) {
             runtime_stack.push(new Frame(pc + 1));
-            pc = instructions + functions[i.operand[0]];
+            pc = instructions + functions[i.operand0];
         } JUMP;
         CASE(RETURN) {
             pc = runtime_stack.top()->return_address;
             runtime_stack.pop();
         } JUMP;
         CASE(BR) {
-            pc = instructions + i.operand[0];
+            pc = instructions + i.operand0;
         } JUMP;
         CASE(BR_N) {
 
         } JUMP;
         CASE(COPY) {
-            registers[i.operand[0]] = constant_pool[i.operand[1]];
+            registers[i.operand0] = constant_pool[i.operand1];
         } NEXT;
         CASE(ADD0) {
-            registers[i.operand[0]] = (Object_*) ((int) registers[i.operand[1]] + (int) registers[i.operand[2]]);
+            registers[i.operand0] = (Object_*) (registers[i.operand1]->i + registers[i.operand2]->i);
         } NEXT;
         CASE(ADD1) {
-            registers[i.operand[0]] = (Object_*) ((int) registers[i.operand[1]] + (int) constant_pool[i.operand[2]]);
+            registers[i.operand0] = (Object_*) (registers[i.operand1]->i + constant_pool[i.operand2]->i);
         } NEXT;
         CASE(ADD2) {
-            registers[i.operand[0]] = (Object_*) ((int) constant_pool[i.operand[1]] + (int) constant_pool[i.operand[2]]);
+            registers[i.operand0] = (Object_*) (constant_pool[i.operand1]->i + constant_pool[i.operand2]->i);
         } NEXT;
         CASE(SUB0) {
-            registers[i.operand[0]] = (Object_*) ((int) registers[i.operand[1]] - (int) registers[i.operand[2]]);
+            registers[i.operand0] = (Object_*) (registers[i.operand1]->i - registers[i.operand2]->i);
         } NEXT;
         CASE(SUB1) {
-            registers[i.operand[0]] = (Object_*) ((int) registers[i.operand[1]] - (int) constant_pool[i.operand[2]]);
+            registers[i.operand0] = (Object_*) (registers[i.operand1]->i - constant_pool[i.operand2]->i);
         } NEXT;
         CASE(SUB2) {
-            registers[i.operand[0]] = (Object_*) ((int) constant_pool[i.operand[1]] - (int) constant_pool[i.operand[2]]);
+            registers[i.operand0] = (Object_*) (constant_pool[i.operand1]->i - constant_pool[i.operand2]->i);
         } NEXT;
         CASE(MUL0) {
-            registers[i.operand[0]] = (Object_*) ((int) registers[i.operand[1]] * (int) registers[i.operand[2]]);
+            registers[i.operand0] = (Object_*) (registers[i.operand1]->i * registers[i.operand2]->i);
         } NEXT;
         CASE(MUL1) {
-            registers[i.operand[0]] = (Object_*) ((int) registers[i.operand[1]] * (int) constant_pool[i.operand[2]]);
+            registers[i.operand0] = (Object_*) (registers[i.operand1]->i * constant_pool[i.operand2]->i);
         } NEXT;
         CASE(MUL2) {
-            registers[i.operand[0]] = (Object_*) ((int) constant_pool[i.operand[1]] * (int) constant_pool[i.operand[2]]);
+            registers[i.operand0] = (Object_*) (constant_pool[i.operand1]->i * constant_pool[i.operand2]->i);
         } NEXT;
         CASE(DIV0) {
-            registers[i.operand[0]] = (Object_*) ((int) registers[i.operand[1]] / (int) registers[i.operand[2]]);
+            registers[i.operand0] = (Object_*) (registers[i.operand1]->i / registers[i.operand2]->i);
         } NEXT;
         CASE(DIV1) {
-            registers[i.operand[0]] = (Object_*) ((int) registers[i.operand[1]] / (int) constant_pool[i.operand[2]);
+            registers[i.operand0] = (Object_*) (registers[i.operand1]->i / constant_pool[i.operand2]->i);
         } NEXT;
         CASE(DIV2) {
-            registers[i.operand[0]] = (Object_*) ((int) constant_pool[i.operand[1]] / (int) constant_pool[i.operand[2]]);
+            registers[i.operand0] = (Object_*) (constant_pool[i.operand1]->i / constant_pool[i.operand2]->i);
         } NEXT;
         CASE(PRINT0) {
-            printf("%s", (*constant_pool[i.operand[0]]).s);
+            printf("%s", constant_pool[i.operand0]->s);
         } NEXT;
         CASE(PRINT1) {
-            printf("%u", *(uint32_t*)registers[i.operand[0]]);
+            printf("%d", registers[i.operand0]->i);
         } NEXT;
     }
     END_DISPATCH;
@@ -234,7 +242,7 @@ uint8_t* VirtualMachine::read(const int32_t length) {
 }
 uint32_t* VirtualMachine::read_int() {
     auto bytes = read(4);
-    DEBUG_OUT("read_int called and returned :" + *(uint32_t*)bytes);
+    DEBUG_OUT("read_int called and returned : ", *(uint32_t*)bytes);
     return (uint32_t*)bytes;
 }
 #undef DEBUG_OUT

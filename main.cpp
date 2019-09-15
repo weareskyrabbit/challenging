@@ -1,13 +1,12 @@
 #include <iostream>
 #include <fstream>
-#include <vector>
 
 #include "VirtualMachine.h"
 
 using namespace std;
 
 int main() {
-    VirtualMachine* vm = new VirtualMachine();
+    auto* vm = new VirtualMachine();
     // write
     ofstream fout;
     fout.open(R"(test2.wc)", ios::out | ios::binary | ios::trunc);
@@ -15,7 +14,7 @@ int main() {
         cout << "error : file 'test2.wc' didn't open" << endl;
         return 1;
     }
-    unsigned int test2[] = {
+    uint32_t test2[] = {
             0xdeadbeef, // magic
             0,          // entry point
             4,          // registers size
@@ -45,8 +44,8 @@ int main() {
             0,          // tag int
             3
     };
-    for (int instruction : test2) {
-        fout.write((char*) &instruction, sizeof(int));
+    for (uint32_t instruction : test2) {
+        fout.write((char*) &instruction, sizeof(uint32_t));
     }
 
     fout.close();
@@ -56,7 +55,7 @@ int main() {
         cout << "error : file 'test3.wc' didn't open" << endl;
         return 1;
     }
-    unsigned int test3[] = {
+    uint32_t test3[] = {
             0xdeadbeef, // magic
             0,          // entry point
             1,          // registers size
@@ -77,13 +76,13 @@ int main() {
 
             // c0 "display"
             1,          // tag string
-            7,
+            8,
             0x70736964,
             0x0079616c
 
     };
-    for (int instruction : test3) {
-        fout.write((char*) &instruction, sizeof(int));
+    for (uint32_t instruction : test3) {
+        fout.write((char*) &instruction, sizeof(uint32_t));
     }
 
     fout.close();
@@ -132,7 +131,7 @@ int main() {
         cout << "error : file 'hello.wc' didn't open" << endl;
         return 1;
     }
-    unsigned int hello[] = {
+    uint32_t hello[] = {
             0xdeadbeef, // magic
             0,          // entry point
             1,          // registers size
@@ -152,16 +151,16 @@ int main() {
             12,
             0x6c6c6568,
             0x6f77206f,
-            0x21646c72
+            0x00646c72
     };
-    for (int instruction : hello) {
-        fout.write((char*) &instruction, sizeof(int));
+    for (uint32_t instruction : hello) {
+        fout.write((char*) &instruction, sizeof(uint32_t));
     }
 
     fout.close();
 
     // load & execute
-    int entry_point = vm->load(string("test2"));
+    uint32_t entry_point = vm->load(string("test2"));
     vm->execute(entry_point);
 
     // load & execute
