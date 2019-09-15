@@ -6,10 +6,12 @@
 #define CHALLENGING_FRAME_H
 
 
+#include "Structures/instruction.h"
+
 class Frame {
 public:
-    int* return_address;
-    Frame(int* return_address) {
+    instruction* return_address;
+    Frame(instruction* return_address) {
         this->return_address = return_address;
     }
 };
