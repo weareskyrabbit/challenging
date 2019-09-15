@@ -10,11 +10,13 @@
 #include <vector>
 #include <iterator>
 #include "Object_.h"
+#include "Frame.h"
 
 using namespace std;
 
 class VirtualMachine {
 private:
+    /* method area */
     vector<uint8_t> input;
     int position;
     int* instructions;
@@ -22,13 +24,15 @@ private:
     int counter; // program counter
     Object_** registers;
     int* functions;
+    /* stack */
+    stack<Frame*> runtime_stack;
+    /* heap */
 public:
-    VirtualMachine(const vector<uint8_t> input) {
-        this->input = input;
+    VirtualMachine() {
         this->position = 0;
         this->counter = 0;
     }
-    int analyze();
+    int load(string file_name);
     void execute(int entry_point);
 private:
     vector<uint8_t> read(int length);

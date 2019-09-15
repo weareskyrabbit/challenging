@@ -7,7 +7,7 @@
 using namespace std;
 
 int main() {
-    vector<uint8_t> input;
+    VirtualMachine* vm = new VirtualMachine();
     // write
     ofstream fout;
     fout.open(R"(test2.wc)", ios::out | ios::binary | ios::trunc);
@@ -67,21 +67,19 @@ int main() {
 
             // main
             4,          // instructions size
-            0x01000000, // call   c0
+            0x01010000, // call   1
             0x00000000, // stop
-            // hello
-            0x30010000, // print_string c1
+            // display
+            0x30000000, // print_string c1
             0x02000000, // return
 
-            2,          // constant pool size
-            // TODO function
+            1,          // constant pool size
 
-            // c1 "hello world!"
+            // c0 "display"
             1,          // tag string
-            12,
-            0x6c6c6568,
-            0x6f77206f,
-            0x21646c72
+            7,
+            0x70736964,
+            0x0079616c
 
     };
     for (int instruction : test3) {
@@ -162,47 +160,16 @@ int main() {
 
     fout.close();
 
-    // read
-    ifstream fin;
-    fin.open(R"(test2.wc)", ios::in | ios::binary);
-    if (!fin) {
-        cout << "error : file 'test2.wc' didn't open" << endl;
-        return 1;
-    }
-    while (!fin.eof()) {
-        uint8_t byte = 0;
-        fin.read((char*) &byte, sizeof(uint8_t));
-        input.push_back(byte);
-    }
-    fin.close();
-    VirtualMachine* vm = new VirtualMachine(input);
-
-    // analyze
-    int entry_point = vm->analyze();
-
-    // execute
+    // load & execute
+    int entry_point = vm->load(string("test2"));
     vm->execute(entry_point);
 
-    input.clear();
+    // load & execute
+    entry_point = vm->load(string("test3"));
+    vm->execute(entry_point);
 
-    // read
-    fin.open(R"(hello.wc)", ios::in | ios::binary);
-    if (!fin) {
-        cout << "error : file 'hello.wc' didn't open" << endl;
-        return 1;
-    }
-    while (!fin.eof()) {
-        uint8_t byte = 0;
-        fin.read((char*) &byte, sizeof(uint8_t));
-        input.push_back(byte);
-    }
-    fin.close();
-    vm = new VirtualMachine(input);
-
-    // analyze
-    entry_point = vm->analyze();
-
-    // execute
+    // load & execute
+    entry_point = vm->load(string("hello"));
     vm->execute(entry_point);
     return 0;
 }

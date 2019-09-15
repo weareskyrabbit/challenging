@@ -2,9 +2,27 @@
 // Created by mirro on 2019/09/13.
 //
 
+#include <fstream>
 #include "VirtualMachine.h"
 
-int VirtualMachine::analyze() {
+using namespace std;
+
+int VirtualMachine::load(string file_name) {
+    input.clear();
+    file_name += ".wc";
+    ifstream fin;
+    fin.open(file_name.c_str(), ios::in | ios::binary);
+    if (!fin) {
+        cout << "error : file `"<< file_name.c_str() <<"` didn't open" << endl;
+        return 1;
+    }
+    while (!fin.eof()) {
+        uint8_t byte = 0;
+        fin.read((char*) &byte, sizeof(uint8_t));
+        input.push_back(byte);
+    }
+    fin.close();
+
     int magic = read_int();
     if (magic != 0xdeadbeef) {
         cout << "error : magic is invalid" << endl;
@@ -145,17 +163,19 @@ void VirtualMachine::execute(int entry_point) {
             return;
         } NEXT;
         CASE(CALL) {
-            // TODO
-        } NEXT;
+            runtime_stack.push(new Frame(pc + 1));
+            pc = instructions + functions[operand1()];
+        } JUMP;
         CASE(RETURN) {
-            // TODO
-        } NEXT;
+            pc = runtime_stack.top()->return_address;
+            runtime_stack.pop();
+        } JUMP;
         CASE(BR) {
-
-        } NEXT;
+            pc = instructions + operand1();
+        } JUMP;
         CASE(BR_N) {
 
-        } NEXT;
+        } JUMP;
         CASE(COPY) {
             registers[operand1(i)] = constant_pool[operand2(i)];
         } NEXT;
