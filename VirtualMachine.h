@@ -9,38 +9,34 @@
 #include <stack>
 #include <vector>
 #include <iterator>
+
 #include "Object_.h"
+#include "Frame.h"
+#include "Structures/instruction.h"
 
 using namespace std;
 
 class VirtualMachine {
 private:
     vector<uint8_t> input;
-    int position;
-    int* instructions;
+    uint32_t position;
+    instruction* instructions;
     Object_** constant_pool;
-    int counter; // program counter
+    uint32_t counter; // program counter
     Object_** registers;
-    int* functions;
+    uint32_t* functions;
+    stack<Frame*> runtime_stack;
 public:
     VirtualMachine(const vector<uint8_t> input) {
         this->input = input;
         this->position = 0;
         this->counter = 0;
     }
-    int analyze();
+    uint32_t analyze();
     void execute(int entry_point);
 private:
-    vector<uint8_t> read(int length);
-    unsigned int read_int();
-    unsigned int type();
-    unsigned int operand1();
-    unsigned int operand2();
-    unsigned int operand3();
-    unsigned int type(int instruction);
-    unsigned int operand1(int instruction);
-    unsigned int operand2(int instruction);
-    unsigned int operand3(int instruction);
+    uint8_t* read(int32_t length);
+    uint32_t* read_int();
 };
 
 

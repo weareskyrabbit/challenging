@@ -2,16 +2,16 @@
 // Created by mirro on 2019/09/13.
 //
 
-#ifndef UNTITLED7_OBJECT__H
-#define UNTITLED7_OBJECT__H
+#pragma once
 
 #include <string>
 
 using namespace std;
 
 union Object_ {
-    int i;
-    string* s;
-};
+    // int
+    int32_t* i;
 
-#endif //UNTITLED7_OBJECT__H
+    // string
+    int8_t* s;
+};
