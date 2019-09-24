@@ -160,15 +160,15 @@ int main() {
     fout.close();
 
     // load & execute
-    uint32_t entry_point = vm->load(string("test2"));
+    uint32_t entry_point = vm->load("test2"s);
     vm->execute(entry_point);
 
     // load & execute
-    entry_point = vm->load(string("test3"));
+    entry_point = vm->load("test3"s);
     vm->execute(entry_point);
 
     // load & execute
-    entry_point = vm->load(string("hello"));
+    entry_point = vm->load("hello"s);
     vm->execute(entry_point);
     return 0;
 }

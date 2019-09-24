@@ -128,10 +128,10 @@ void VirtualMachine::execute(uint32_t entry_point) {
         &&L_NOP,
         &&L_NOP,
         &&L_COPY,
-        &&L_NOP,
-        &&L_NOP,
-        &&L_NOP,
-        &&L_NOP,
+        &&L_LOAD0,
+        &&L_LOAD1,
+        &&L_STORE0,
+        &&L_STORE1,
         &&L_NOP,
         &&L_NOP,
         &&L_NOP,
@@ -171,12 +171,21 @@ void VirtualMachine::execute(uint32_t entry_point) {
             DEBUG_OUT("stop called with instruction : ", (uint32_t) pc->type);
         } return;
         CASE(CALL) {
-            runtime_stack.push(new Frame(pc + 1));
-            pc = instructions + functions[i.operand0];
+            frame* f = new frame;
+            f.frame_pointer = frame_pointer;
+            f.this_ = this_;
+            f.return_address = pc + 1;
+            frame_pointer++;
+            frame_pointer = f;
+            pc = registers[i.operand0]->o.method_table[i.operand1];
         } JUMP;
         CASE(RETURN) {
-            pc = runtime_stack.top()->return_address;
-            runtime_stack.pop();
+            registers[0] = (Object_*) i.operand0;
+            frame* f = frame_pointer;
+            frame_pointer--;
+            frame_pointer = f.frame_pointer;
+            this_ = f.this_;
+            pc = f.return_address;
         } JUMP;
         CASE(BR) {
             pc = instructions + i.operand0;
@@ -186,6 +195,18 @@ void VirtualMachine::execute(uint32_t entry_point) {
         } JUMP;
         CASE(COPY) {
             registers[i.operand0] = constant_pool[i.operand1];
+        } NEXT;
+        CASE(LOAD0) { // load from fields
+            registers[i.operand0] = this_.fields[i.operand1];
+        } NEXT;
+        CASE(LOAD1) { // load from locals
+            registers[i.operand0] = frame_pointer.locals[i.operand1];
+        } NEXT;
+        CASE(STORE0) { // store to fields
+            this_.fields[i.operand1] = registers[i.operand0];
+        } NEXT;
+        CASE(STORE1) { // store to locals
+            frame_pointer.locals[i.operand1] = registers[i.operand0];
         } NEXT;
         CASE(ADD0) {
             registers[i.operand0] = (Object_*) (registers[i.operand1]->i + registers[i.operand2]->i);

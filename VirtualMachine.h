@@ -6,7 +6,6 @@
 #define UNTITLED7_VIRTUALMACHINE_H
 
 #include <iostream>
-#include <stack>
 #include <vector>
 #include <iterator>
 
@@ -27,7 +26,9 @@ private:
     Object_** registers;
     uint32_t* functions;
     /* stack */
-    stack<Frame*> runtime_stack;
+    frame** runtime_stack;
+    frame* frame_pointer;
+    object* this_;
     /* heap */
 public:
     VirtualMachine() {

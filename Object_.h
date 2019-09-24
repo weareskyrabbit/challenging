@@ -5,8 +5,6 @@
 #ifndef UNTITLED7_OBJECT__H
 #define UNTITLED7_OBJECT__H
 
-#include <string>
-
 using namespace std;
 
 union Object_ {
@@ -15,6 +13,9 @@ union Object_ {
 
     // string
     int8_t* s;
+
+    // object
+    object o;
 };
 
 #endif
