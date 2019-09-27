@@ -1,19 +1,27 @@
 #include <iostream>
 #include <fstream>
 
+#include "Converter.h"
 #include "VirtualMachine.h"
 
 using namespace std;
 
 int main() {
-    auto* vm = new VirtualMachine();
-    // write
-    ofstream fout;
-    fout.open(R"(test2.wc)", ios::out | ios::binary | ios::trunc);
-    if (!fout) {
-        cout << "error : file 'test2.wc' didn't open" << endl;
-        return 1;
-    }
+    VirtualMachine* vm;
+    auto* converter = new Converter();
+    // test2
+    converter->IRtoWC(string("test2"));
+    vm = converter->WCtoMemory(string("test2"));
+    vm->execute();
+    // test3
+    converter->IRtoWC(string("test3"));
+    vm = converter->WCtoMemory(string("test3"));
+    vm->execute();
+    // hello
+    converter->IRtoWC(string("hello"));
+    vm = converter->WCtoMemory(string("hello"));
+    vm->execute();
+
     uint32_t test2[] = {
             0xdeadbeef, // magic
             0,          // entry point
@@ -44,11 +52,6 @@ int main() {
             0,          // tag int
             3
     };
-    for (uint32_t instruction : test2) {
-        fout.write((char*) &instruction, sizeof(uint32_t));
-    }
-
-    fout.close();
 
     fout.open(R"(test3.wc)", ios::out | ios::binary | ios::trunc);
     if (!fout) {

@@ -6,8 +6,14 @@
 #define UNTITLED7_GARBAGECOLLECTION_H
 
 
-class GarbageCollection {
+#include "Object_.h"
 
+class GarbageCollection {
+public:
+    Object_* new_();
+    void collect();
+    void mark_from_roots();
+    void mark();
 };
 
 

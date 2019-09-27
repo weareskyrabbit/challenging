@@ -1,9 +1,6 @@
-//
-// Created by mirro on 2019/09/13.
-//
-
 #include <fstream>
 #include "VirtualMachine.h"
+#include "Frame.h"
 
 using namespace std;
 
@@ -171,11 +168,17 @@ void VirtualMachine::execute(uint32_t entry_point) {
             DEBUG_OUT("stop called with instruction : ", (uint32_t) pc->type);
         } return;
         CASE(CALL) {
-            runtime_stack.push(new Frame(pc + 1));
-            pc = instructions + functions[i.operand0];
+            frame* f = new frame;
+            f->this_ = register_[-1];
+            f->return_address = pc + 1;
+            runtime_stack.push(f);
+            register_[-1] = register_[pc->operand0];
+            pc = register_[-1].o.dynamic_function[pc->operand1].offset;
         } JUMP;
         CASE(RETURN) {
-            pc = runtime_stack.top()->return_address;
+            frame* f = runtime_stack.top();
+            register_[-1] = f->this_;
+            pc = f->return_address;
             runtime_stack.pop();
         } JUMP;
         CASE(BR) {

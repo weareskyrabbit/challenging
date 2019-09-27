@@ -1,0 +1,7 @@
+<initialize>
+c0 = string "display"
+
+<main>
+call display
+<display>
+print c0

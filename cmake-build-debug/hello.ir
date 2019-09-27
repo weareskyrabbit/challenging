@@ -1,0 +1,5 @@
+<initialize>
+c0 = string "hello world"
+
+<main>
+print c0
